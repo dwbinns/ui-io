@@ -1,0 +1,22 @@
+<html>
+
+<head>
+    <title>Data Input and Output</title>
+</head>
+
+<body>
+    <script type="module">
+        import { html, Data } from "ui-io";
+        const { input, sup } = html(document);
+
+        const number = new Data(2);
+        document.body.append(
+            input(value(number)),
+            sup("2"),
+            "=",
+            number.to(v => v ** 2),
+        );
+    </script>
+</body>
+
+</html>

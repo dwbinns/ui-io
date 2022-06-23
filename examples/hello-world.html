@@ -1,0 +1,18 @@
+<html>
+<head>
+    <title>Hello World</title>
+    <!--#importmap-->
+</head>
+<body>
+    <script type="module">
+        import { html } from "ui-io";
+
+        const { h1 } = html(document);
+
+        document.body.append(
+            h1("hello world")
+        );
+    </script>
+</body>
+
+</html>

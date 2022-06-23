@@ -1,0 +1,11 @@
+{
+  "name": "ui-io",
+  "version": "1.0.0",
+  "description": "HTML/SVG ui connected to data",
+  "main": "index.js",
+  "license": "ISC",
+  "dependencies": {
+    "fs-serve": "^2.0.1",
+    "make-import-map": "^1.0.0"
+  }
+}
