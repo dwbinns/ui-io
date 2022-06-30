@@ -62,6 +62,20 @@ function applyObject(target, definition, apply) {
     }
 }
 
+export function classList(...names) {
+    return element => {
+        for (let name of names) {
+            if (name.observe) {
+                name.observe(element, (v, prior) => {
+                    if (prior !== undefined) element.classList.remove(prior);
+                    element.classList.add(v);
+                });
+            } else {
+                element.classList.add(name);
+            }
+        }
+    };
+}
 
 export function style(definition) {
     return element => applyObject(element, definition, (key, value) => element.style[key] = value);
@@ -71,11 +85,15 @@ export function properties(definition) {
     return element => applyObject(element, definition, (key, value) => element[key] = value);
 }
 
+export function attr(definition) {
+    return element => applyObject(element, definition, (key, value) => element.setAttribute(key, value));
+}
+
 export function on(name, action) {
     return element => element.addEventListener(name, action);
 }
 
-export const html = document => new Proxy({}, {
+export const HTML = document => new Proxy({}, {
     get: (target, name) =>
         (...content) => {
             let element = document.createElement(name);
@@ -84,7 +102,7 @@ export const html = document => new Proxy({}, {
         }
 });
 
-export const svg = document => new Proxy({}, {
+export const SVG = document => new Proxy({}, {
     get: (target, name) =>
         (...content) => {
             let element = document.createElementNS("http://www.w3.org/2000/svg", name);
@@ -94,10 +112,15 @@ export const svg = document => new Proxy({}, {
 });
 
 export function value(data) {
+    let preventUpdates = false;
     return properties({
-        value: data.to(v => v?.toString() || ''),
-        oninput: event => {console.log(event);data.set(event.target.value)},
+        value: data.to((v, prior) => preventUpdates ? prior : `${v}`),
+        onfocus: () => preventUpdates = true,
+        oninput: event => data.set(event.target.value),
+        onblur: event => { preventUpdates = false; event.target.value = `${data.get()}` },
     });
 }
+
+
 
 

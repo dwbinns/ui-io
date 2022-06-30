@@ -2,14 +2,164 @@
 
 <head>
     <title>UI-IO examples</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            display: flex;
+            flex-direction: row;
+        }
+
+        div.tab-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+
+            background: #fff;
+        }
+
+        article {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        div.playground {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: row;
+        }
+
+        div.playground>div {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            width: 0;
+        }
+
+        div.playground>div>* {
+            margin: 10px;
+        }
+
+        div.results {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        div.results>* {
+            flex-grow: 1;
+        }
+
+        section {
+            margin: 10px;
+        }
+
+        ul {
+            padding: 20px 0;
+        }
+
+        li {
+            border: 2px solid #ccc;
+            list-style: none;
+            padding: 5px 20px;
+            border-radius: 5px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        li.selected {
+            border: 2px solid #777;
+        }
+
+        .narrow {
+            display: none;
+        }
+
+
+        @media (min-width: 1101px) {
+            ul {
+                border-right: 2px solid #777;
+            }
+
+            li {
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+                border-right-width: 0;
+            }
+
+            li.selected {
+                margin-right: -2px;
+                border-right: 2px solid #fff;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            body {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 900px) {
+            div.playground {
+                flex-direction: column;
+            }
+
+            div.playground>div {
+                width: unset;
+            }
+
+            .narrow {
+                display: unset;
+            }
+
+            .wide {
+                display: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <iframe src="./hello-world.html"></iframe>
-    <iframe src="./data-input-output.html"></iframe>
-    <iframe src="./progressive-tabs.html"></iframe>
-    <script type="module">
-        
+    <article id="introduction">
+        <h1>Introduction</h1>
+        <section>
+            <p>This is a playground and tutorial for the UI-IO library</p>
+            <p class="wide">Edit the HTML in the panel to the right and the JS in the panel below and explore what
+                happens in the document on the right</p>
+            <p class="narrow">Edit the HTML in the lower panel and the JS in the upper panel and explore what happens in
+                the document beneath</p>
+            <p>To install the library in your own projects:</p>
+            <code>npm install ui-io</code>
+            <p>Use a bundler (e.g. webpack) to build your application and import the library</p>
+        </section>
+        <a class="script" href="./introduction.js">JS</a>
+    </article>
+    <article id="data-io">
+        <h1>Data input & output</h1>
+        <section>
+        </section>
+        <a class="script" href="./data-input-output.js"></a>
+    </article>
+    <article id="progressive">
+        <h1>Progressive enhancement</h1>
+        <section>
+        </section>
+        <a class="script" href="./progressive-tabs.js"></a>
+        <a class="html" href="./progressive-tabs.html">HTML</a>
+    </article>
+    <article id="network">
+        <h1>Network data</h1>
+        <section>
+        </section>
+        <a class="script" href="./network.js"></a>
+    </article>
+    <article id="svg">
+        <h1>SVG</h1>
+        <section>
+        </section>
+        <a class="script" href="./svg.js"></a>
+    </article>
+    <script src="./dist/examples.js">
     </script>
 </body>
 

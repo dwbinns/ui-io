@@ -7,6 +7,32 @@ class Observer {
 
 const factoryOf = v => typeof v == "function" ? v : () => v;
 
+
+function checkType(value, type) {
+    if (type == null) return value == null;
+    if (value == null) return false;
+    if (typeof type == "string") return typeof value == type;
+    return value instanceof type;
+}
+
+function typeName(type) {
+    if (type == null) return "null";
+    if (typeof type == "function") return type.constructor.name;
+    return type;
+}
+
+function check(...checks) {
+    let index = 0;
+    for (let [value, ...types] of checks) {
+        index ++;
+        if (!types.some(type => checkType(value, type))) {
+            let error = new Error(`Argument ${index} not of correct type (any of: ${types.map(typeName).join(", ")})`);
+            Error.captureStackTrace?.(error, check);
+            throw error;
+        }
+    }
+}
+
 export class Data {
     #changeListeners = [];
     #references = [];
@@ -25,7 +51,8 @@ export class Data {
     }
 
     log(name) {
-        this.observe(this, v => console.log(name, v));
+        let onChange = this[Symbol()] = v => console.log(name, v);
+        this.#changeListeners.unshift(new WeakRef(onChange));
     }
 
     set(value) {
@@ -55,7 +82,6 @@ export class Data {
     observe(target, callback) {
         target[Symbol()] = this.#notify(callback);
         if (this.value !== undefined) callback(this.value);
-
     }
 
     derive(from, transform) {
@@ -67,6 +93,8 @@ export class Data {
     }
 
     to(forward, reverse) {
+        check([forward, Function], [reverse, null, Function]);
+
         let derived = new Data();
         if (this.value !== undefined) derived.set(forward(this.value));
 
@@ -78,12 +106,36 @@ export class Data {
         return derived;
     }
 
+    debounce(waitMS) {
+        let derived = new Data();
+        let timeout;
+        this.observe(derived, v => {
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(() => derived.set(v), waitMS);
+        });
+        return derived;
+    }
+
     asyncResult() {
         let derived = new Data();
         let latestPromise;
         this.observe(derived, promise => {
             latestPromise = promise;
             promise.then(v => latestPromise == promise && derived.set(v));
+        });
+        return derived;
+    }
+
+    asyncStatus() {
+        let derived = new Data();
+        let latestPromise;
+        this.observe(derived, promise => {
+            latestPromise = promise;
+            derived.set("loading");
+            promise.then(
+                () => latestPromise == promise && derived.set("loaded"),
+                () => latestPromise == promise && derived.set("failed")
+            );
         });
         return derived;
     }
@@ -177,6 +229,22 @@ export class Data {
 
         derived.set(calculate());
         return derived;
+    }
+
+    static periodic(callback, timeMS) {
+        const data = new Data();
+        const update = async () => {
+            let result = callback();
+            data.set(result);
+            try {
+                await result;
+            } catch (e) {
+                console.error(e);
+            }
+            setInterval(update, timeMS);
+        };
+        update();
+        return data;
     }
 
     static check(data) {

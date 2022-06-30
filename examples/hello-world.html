@@ -1,16 +1,26 @@
 <html>
+
 <head>
     <title>Hello World</title>
-    <!--#importmap-->
 </head>
-<body>
-    <script type="module">
-        import { html } from "ui-io";
 
+<body>
+    <script>
+        window.addEventListener("error", window.parent.iframeError);
+    </script>
+    <script type="module">
+        // html creates HTML elements
+        import { html } from "./ui-io.js";
+
+        // attach it to a document
+        // and get functions to generate the elements you will use later
         const { h1 } = html(document);
 
+        // throw new Error("hi");
+
         document.body.append(
-            h1("hello world")
+            // create an h1 element, and add content to it:
+            h1("Hello world!")
         );
     </script>
 </body>

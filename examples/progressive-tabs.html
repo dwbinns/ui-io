@@ -1,25 +1,13 @@
 <html>
     <head>
-        <title>Progressive Tabs</title>
+        <title>Progressive tabs example</title>
     </head>
     <body>
-        <script type="module">
-            import { html, Data, on } from "ui-io";
-        
-            const sections = document.querySelectorAll("section");
-        
-            const selectedTab = new Data(sections[0]);
-        
-            const tabContainer = div(
-                sections.map(section => 
-                    div(
-                        on('click', () => selectedTab.set(section)),
-                        section.getAttribute("title")
-                    )
-                )
-            );
-        
-            document.body.replace(tabContainer, selectedTab);
-        </script>
+        <article title="Tab 1">
+            Tab 1 content
+        </article>
+        <article title="Tab 2">
+            Tab 2 content
+        </article>
     </body>
 </html>
