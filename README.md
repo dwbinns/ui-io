@@ -1,4 +1,4 @@
-# HTML/SVG user interface connected to data
+# Data driven web user interface library
 
 `ui-io` is a library for connecting data to HTML or SVG user interfaces.
 

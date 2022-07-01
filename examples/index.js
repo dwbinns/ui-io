@@ -11,17 +11,21 @@ const { iframe, div, ul, li, pre } = HTML(document);
 function editor(code$, language) {
     let codeEditor = div();
 
-    let editor = new EditorView({
-        state: EditorState.create({
-            doc: code$.get(),
-            extensions: [
-                basicSetup,
-                language(),
-                EditorView.updateListener.of(() => code$.set(editor.state.doc.toString())),
-                indentUnit.of("    "),
-            ]
-        }),
-        parent: codeEditor,
+    let editor;
+
+    code$.observe(codeEditor, v => {
+        editor ||= new EditorView({
+            state: EditorState.create({
+                doc: v,
+                extensions: [
+                    basicSetup,
+                    language(),
+                    EditorView.updateListener.of(() => code$.set(editor.state.doc.toString())),
+                    indentUnit.of("    "),
+                ]
+            }),
+            parent: codeEditor,
+        });
     });
 
     return codeEditor;
@@ -43,8 +47,8 @@ for (let article of document.querySelectorAll("article")) {
     let srcHtml = article.querySelector("a.html")?.href || "./blank.html";
     let id = article.id;
 
-    let code$ = new Data(await (await fetch(srcJs)).text());
-    let doc$ = new Data(await (await fetch(srcHtml)).text());
+    let code$ = new Data(fetch(srcJs).then(response => response.text())).asyncResult();
+    let doc$ = new Data(fetch(srcHtml).then(response => response.text())).asyncResult();
 
     let error$ = new Data();
 

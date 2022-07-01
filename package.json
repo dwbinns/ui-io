@@ -1,12 +1,17 @@
 {
   "name": "ui-io",
   "version": "1.0.0",
-  "description": "HTML/SVG user interface connected to data",
+  "description": "Data driven web user interface library",
   "exports": "./index.js",
   "license": "ISC",
   "scripts": {
     "start": "webpack serve",
     "build": "webpack"
+  },
+  "homepage": "https://davidb.uk/ui-io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dwbinns/ui-io.git"
   },
   "devDependencies": {
     "@codemirror/basic-setup": "^0.20.0",
