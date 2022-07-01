@@ -1,6 +1,6 @@
 {
   "name": "ui-io",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Data driven web user interface library",
   "exports": "./index.js",
   "license": "ISC",
