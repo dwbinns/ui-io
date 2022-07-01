@@ -1,8 +1,23 @@
 const path = require('path');
+const { version } = require("./package.json");
+const { DefinePlugin } = require("webpack");
+
+const config = {
+    mode: 'development',
+    experiments: {
+        outputModule: true,
+        topLevelAwait: true,
+    },
+    plugins: [
+        new DefinePlugin({
+            'process.env.VERSION': JSON.stringify(version),
+        })
+    ]
+};
 
 module.exports = [
     {
-        mode: 'development',
+        ...config,
         entry: './index.js',
         output: {
             publicPath: "/dist",
@@ -11,15 +26,9 @@ module.exports = [
             library: {
                 type: 'module',
             },
-        },
-        devServer: {
-            static: './examples',
-        },
-        experiments: {
-            outputModule: true,
-            topLevelAwait: true,
-        },
+        }
     }, {
+        ...config,
         mode: 'development',
         entry: './examples/index.js',
         output: {
@@ -27,9 +36,8 @@ module.exports = [
             filename: 'examples.js',
             path: path.resolve(__dirname, 'examples', 'dist'),
         },
-        experiments: {
-            outputModule: true,
-            topLevelAwait: true,
+        devServer: {
+            static: './examples',
         },
     }
 ];

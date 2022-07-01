@@ -7,5 +7,5 @@ document.body.append(
     // create an h1 element, and add content to it:
     h1("Hello world!"),
     // Data tracks changes to an item of data:
-    div(Data.periodic(Date, 1000))
+    div(Data.periodic(Date, 1000)),
 );

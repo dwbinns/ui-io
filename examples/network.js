@@ -1,5 +1,5 @@
 import { Data, HTML, value, properties, style } from "ui-io";
-const { div, input, a } = HTML(document);
+const { div, input, a, label } = HTML(document);
 
 const search$ = new Data("ui-io");
 
@@ -29,7 +29,7 @@ const results$ = searchResult$
     );
 
 document.body.append(
-    input(value(search$)),
+    div(label('Search NPM: ', input(value(search$)))),
     div(searchResult$.asyncStatus()),
     div(style({ display: 'flex', flexDirection: 'column' }),
         results$,

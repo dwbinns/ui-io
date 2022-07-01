@@ -3,7 +3,7 @@ import { javascript } from "@codemirror/lang-javascript";
 import { indentUnit } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 import { basicSetup, EditorView } from "codemirror";
-import { classList, Data, HTML, on, style } from "ui-io";
+import { classList, Data, HTML, on, style, version } from "ui-io";
 import { locationHashData } from "../browser";
 
 const { iframe, div, ul, li, pre } = HTML(document);
@@ -112,3 +112,6 @@ if (!examples.get(selectedId$.get())) {
 
 document.body.append(ul(...tabs), div(classList('tab-content'), selectedId$.to(id => examples.get(id))));
 
+for (let versionElement of document.querySelectorAll(".version")) {
+    versionElement.append(version);
+}
