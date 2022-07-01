@@ -234,14 +234,14 @@ export class Data {
     static periodic(callback, timeMS) {
         const data = new Data();
         const update = async () => {
-            let result = callback();
-            data.set(result);
             try {
+                let result = callback();
+                data.set(result);
                 await result;
             } catch (e) {
                 console.error(e);
             }
-            setInterval(update, timeMS);
+            setTimeout(update, timeMS);
         };
         update();
         return data;
