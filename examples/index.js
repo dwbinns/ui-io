@@ -3,10 +3,12 @@ import { javascript } from "@codemirror/lang-javascript";
 import { indentUnit } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 import { basicSetup, EditorView } from "codemirror";
-import { classList, Data, HTML, on, style, version } from "ui-io";
+import { classList, Data, HTML, on, style } from "ui-io";
 import { locationHashData } from "../browser";
 
 const { iframe, div, ul, li, pre } = HTML(document);
+
+const version = process.env.VERSION; // from webpack
 
 function editor(code$, language) {
     let codeEditor = div();
