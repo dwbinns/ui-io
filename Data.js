@@ -51,8 +51,7 @@ export class Data {
     }
 
     log(name) {
-        let onChange = this[Symbol()] = v => console.log(name, v);
-        this.#changeListeners.unshift(new WeakRef(onChange));
+        this.observe(this, v => console.log(name, v));
     }
 
     set(value) {
