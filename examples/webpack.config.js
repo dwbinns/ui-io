@@ -1,6 +1,9 @@
 const path = require('path');
-const { version } = require("./package.json");
+const { version } = require("../package.json");
 const { DefinePlugin } = require("webpack");
+const { cpSync } = require('fs');
+
+cpSync("./web", "./dist", { recursive: true });
 
 const config = {
     mode: 'development',
@@ -18,11 +21,11 @@ const config = {
 module.exports = [
     {
         ...config,
-        entry: './index.js',
+        entry: '../index.js',
         output: {
-            publicPath: "/dist",
+            publicPath: "/",
             filename: 'ui-io.js',
-            path: path.resolve(__dirname, 'examples', 'dist'),
+            path: path.resolve(__dirname, 'dist'),
             library: {
                 type: 'module',
             },
@@ -30,14 +33,14 @@ module.exports = [
     }, {
         ...config,
         mode: 'development',
-        entry: './examples/index.js',
+        entry: './src/index.js',
         output: {
-            publicPath: "/dist",
+            publicPath: "/",
             filename: 'examples.js',
-            path: path.resolve(__dirname, 'examples', 'dist'),
+            path: path.resolve(__dirname, 'dist'),
         },
         devServer: {
-            static: './examples',
+            static: './web',
         },
     }
 ];

@@ -3,8 +3,7 @@ import { javascript } from "@codemirror/lang-javascript";
 import { indentUnit } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 import { basicSetup, EditorView } from "codemirror";
-import { classList, Data, HTML, on, style } from "ui-io";
-import { locationHashData } from "../browser";
+import { locationHashData, classList, Data, HTML, on, style } from "ui-io";
 
 const { iframe, div, ul, li, pre } = HTML(document);
 
@@ -57,14 +56,14 @@ for (let article of document.querySelectorAll("article")) {
     let results = iframe(style({display: error$.if('none', 'block')}));
     
     Data.from(doc$, code$, (doc, code) => [doc, code]).observe(results, ([doc, code]) => {
+        if (!code || !doc) return;
         error$.set(null);
         results.setAttribute("srcdoc", doc);
         results.onload = () => {
             let scriptElement = results.contentDocument.createElement("script");
             scriptElement.type = "module";
             results.contentWindow.addEventListener("error", event => error$.set(event.error.stack));
-            let replacedCode = code.replace(/(import.*)from ["']ui-io["']/, '$1from "./dist/ui-io.js"');
-            console.log(replacedCode);
+            let replacedCode = code.replace(/(import.*)from ["']ui-io["']/, '$1from "./ui-io.js"');
             scriptElement.append(replacedCode);
             results.contentDocument.body.append(scriptElement);
         };
