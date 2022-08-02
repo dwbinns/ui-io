@@ -37,3 +37,44 @@ export function route(location$, routes, defaultRoute) {
         )
     );
 }
+
+
+
+export function intersectionLoader(options) {
+    let visible = new Set();
+
+    let pending = [];
+
+    let serialize = Promise.resolve();
+
+    async function check() {
+        while (true) {
+            let index = pending.findIndex(({element}) => visible.has(element));
+            if (index < 0) break;
+            let {content$, element, load} = pending[index];
+            pending.splice(index, 1);
+            observer.unobserve(element);
+            visible.delete(index);
+            await load().then(v => content$.set(v));
+        }
+    }
+
+    let observer = new IntersectionObserver((entries) => {
+        for (let {isIntersecting, target} of entries) {
+            if (isIntersecting) visible.add(target);
+            else visible.delete(target);
+        }
+        serialize = serialize.then(check);
+    }, options);
+
+    return (load, loading) => {
+        let content$ = new Data(loading);
+        return [
+            element => {
+                pending.push({content$, element, load});
+                observer.observe(element);
+            }, 
+            content$
+        ];
+    }
+}

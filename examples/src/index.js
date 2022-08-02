@@ -32,16 +32,8 @@ function editor(code$, language) {
     return codeEditor;
 }
 
-let tabs = [];
-
-let selectedId$ = locationHashData();
-
-let examples = new Map();
-
-let firstId = null;
-
-for (let article of document.querySelectorAll("article")) {
-    let title = article.querySelector("h1");
+let articles = [...document.querySelectorAll("article")].map(article => {
+    let title = article.querySelector("h1").innerText;
     let explanation = article.querySelector("section");
 
     let srcJs = article.querySelector("a.script").href;
@@ -53,8 +45,8 @@ for (let article of document.querySelectorAll("article")) {
 
     let error$ = new Data();
 
-    let results = iframe(style({display: error$.if('none', 'block')}));
-    
+    let results = iframe(style({ display: error$.if('none', 'block') }));
+
     Data.from(doc$, code$, (doc, code) => [doc, code]).observe(results, ([doc, code]) => {
         if (!code || !doc) return;
         error$.set(null);
@@ -77,41 +69,77 @@ for (let article of document.querySelectorAll("article")) {
         div(
             classList("playground"),
             div(
-                explanation, 
+                explanation,
                 jsEditor
             ),
             div(
-                htmlEditor, 
+                htmlEditor,
                 div(
                     classList("results"),
-                    results, 
-                    pre(style({display: error$.if('block', 'none')}), error$)
+                    results,
+                    pre(style({ display: error$.if('block', 'none') }), error$)
                 )
             )
         )
     );
 
-    const select = () => selectedId$.set(id);
-
-    if (!tabs.length) firstId = id;
-
-    tabs.push(li(
-        on('click', select),
-        title.innerText,
-        classList(selectedId$.to(v => v == id ? "selected" : "x"))
-    ));
-
-    examples.set(id, article);
-
-    title.remove();
     article.remove();
+
+    return { article, title, id };
+});
+
+
+let selectedId$ = locationHashData();
+
+let menu = articles.map(({ title, id }) => li(
+    on('click', () => selectedId$.set(id)),
+    title,
+    classList(selectedId$.to(v => v == id ? "selected" : "x"))
+));
+
+
+if (!articles.find(a => a.id == selectedId$.get())) {
+    selectedId$.set(articles[0].id);
 }
 
-if (!examples.get(selectedId$.get())) {
-    selectedId$.set(firstId);
-}
+let prior$ = selectedId$.to(id => articles[articles.findIndex(a => a.id == id) - 1]);
+let next$ = selectedId$.to(id => articles[articles.findIndex(a => a.id == id) + 1]);
 
-document.body.append(ul(...tabs), div(classList('tab-content'), selectedId$.to(id => examples.get(id))));
+let prior = prior$.if(div(
+    on('click', () => selectedId$.set(prior$.get().id)),
+    "< ",
+    prior$.to(article => article.title)
+), div());
+
+let next = next$.if(div(
+    on('click', () => selectedId$.set(next$.get().id)),
+    next$.to(article => article.title),
+    " >"
+), div());
+
+
+let menuOpen$ = new Data(false);
+let menuTrigger = div(
+    on('click', () => menuOpen$.toggle()),
+    classList("menu-trigger"),
+    "☰ ",
+    selectedId$.to(id => articles.find(a => a.id == id)?.title)
+);
+let menuList = ul(
+    style({ display: menuOpen$.if(null, "none") }),
+    on('click', () => menuOpen$.toggle()),
+    classList('menu'),
+    menu
+);
+
+document.body.append(
+    div(
+        div(
+            classList("menu-bar"),
+            prior, menuTrigger, next
+        ),
+        menuList, selectedId$.to(id => articles.find(a => a.id == id)?.article))
+);
 
 for (let versionElement of document.querySelectorAll(".version")) {
     versionElement.append(version);

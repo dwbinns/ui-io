@@ -1,5 +1,7 @@
+import { Data } from "./Data.js";
 
-
+const dynamic = Symbol('dynamic');
+const terminal = Symbol('terminal');
 
 function insertContent(parent, before, content) {
     if (content instanceof Array) {
@@ -10,17 +12,25 @@ function insertContent(parent, before, content) {
     }
     if (content == null || content == undefined) return before;
     if (content.observe) {
+        if (before?.[dynamic] == content) return before[terminal].nextSibling;
         let start = document.createTextNode("");
         let end = document.createTextNode("");
+        start[dynamic] = content;
+        start[terminal] = end;
         parent.insertBefore(start, before);
         parent.insertBefore(end, before);
         content.observe(start, value => {
-            let before = start.nextSibling;
-            if (!before) {
-                console.log("Nodes removed");
+            if (!start.nextSibling) {
+                console.log("Nodes removed from document");
                 return;
             }
+
+            let activeElement = document.activeElement;
+
+            let before = start.nextSibling;
             before = insertContent(parent, before, value);
+
+            if (activeElement) activeElement.focus();
 
             while (before != end) {
                 let node = before;
@@ -42,14 +52,23 @@ function insertContent(parent, before, content) {
         return before;
     }
     if (content.nodeType) {
+        //content.style.outline = `2px solid rgb(${random()*256},${random()*256},${random()*256})`;
         parent.insertBefore(content, before);
         return before;
+    }
+    if (content.then) {
+        return insertContent(parent, before, new Data(content).asyncResult());
     }
     if (typeof content == "function") {
         content(parent, before);
         return before;
     }
-    throw new Error(`Unable to insert: ${typeof content}`);
+    parent.insertBefore(document.createTextNode(`${content}`), before);
+    return before;
+}
+
+export function add(element, ...content) {
+    insertContent(element, null, content);
 }
 
 function applyObject(target, definition, apply) {
@@ -89,8 +108,8 @@ export function attr(definition) {
     return element => applyObject(element, definition, (key, value) => element.setAttribute(key, value));
 }
 
-export function on(name, action) {
-    return element => element.addEventListener(name, action);
+export function on(name, action, options) {
+    return element => element.addEventListener(name, action, options);
 }
 
 export const HTML = document => new Proxy({}, {
@@ -112,12 +131,9 @@ export const SVG = document => new Proxy({}, {
 });
 
 export function value(data) {
-    let preventUpdates = false;
     return properties({
-        value: data.to((v, prior) => preventUpdates ? prior : `${v}`),
-        onfocus: () => preventUpdates = true,
+        value: data.to((v) => `${v}`),
         oninput: event => data.set(event.target.value),
-        onblur: event => { preventUpdates = false; event.target.value = `${data.get()}` },
     });
 }
 

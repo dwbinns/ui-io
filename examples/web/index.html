@@ -5,22 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
+            font-family: sans-serif;
+        }
+
+        
+        div.menu-bar {
             display: flex;
             flex-direction: row;
+            align-items: center;
         }
 
-        div.tab-content {
+        div.menu-bar > * {
             flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-
-            background: #fff;
-        }
-
-        article {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
+            width: 0;
+            text-align: center;
+            cursor: pointer;
         }
 
         div.playground {
@@ -54,50 +53,44 @@
             margin: 10px;
         }
 
-        ul {
-            padding: 20px 0;
+        .menu-trigger {
+            padding: 10px;
+            cursor: pointer;
         }
 
-        li {
-            border: 2px solid #ccc;
+        ul.menu {
+            padding: 10px;
+        }
+
+        ul.menu > li {
+            cursor: pointer;
             list-style: none;
             padding: 5px 20px;
-            border-radius: 5px;
             margin-top: 5px;
             margin-bottom: 5px;
+            transition: background-color 200ms;
         }
 
-        li.selected {
-            border: 2px solid #777;
+        ul.menu > li:hover {
+            background-color: #777;
+            color: #fff;
+        }
+
+        ul.menu > li.selected {
+            background-color: #444;
+            color: #fff;
         }
 
         .narrow {
             display: none;
         }
 
-
-        @media (min-width: 1101px) {
-            ul {
-                border-right: 2px solid #777;
-            }
-
-            li {
-                border-top-right-radius: 0;
-                border-bottom-right-radius: 0;
-                border-right-width: 0;
-            }
-
-            li.selected {
-                margin-right: -2px;
-                border-right: 2px solid #fff;
-            }
+        kbd {
+            background-color: #ccc;
+            border: outset;
+            padding: 2px;
         }
 
-        @media (max-width: 1100px) {
-            body {
-                flex-direction: column;
-            }
-        }
 
         @media (max-width: 900px) {
             div.playground {
@@ -141,6 +134,44 @@
         </section>
         <a class="script" href="./data-input-output.js"></a>
     </article>
+    <article id="list">
+        <h1>List</h1>
+        <section>
+            <p>Transform a changing list into a list of rendered content using data.map</p>
+        </section>
+        <a class="script" href="./list.js"></a>
+    </article>
+    <article id="data-map-keys">
+        <h1>Data map keys</h1>
+        <section>
+            <p>Transform each item of a Data list:</p>
+            <pre>data$.map((item$, index$, { remove }) => <i>content</i>)</pre>
+            <pre>data$.map({ key }, (item$, index$, { remove }) => <i>content</i>)</pre>
+            <p><code>key</code>: optional string or function used to compute a unique key to identify items as the list changes.
+                A string will be used as the key for an object in a list of objects.
+                A function will be called with the list item and should return a value to be used as the key.
+            </p>
+            <p><code>item$</code>: Data containing the value of the list item</p>
+            <p><code>index$</code>: Data containing the index (zero based) of the list item</p>
+            <p><code>remove</code>: Function which when called will remove that item from the array</p>
+            <p>This example compares different types of keys:</p>
+            <ul>
+                <li><b>None</b>: list items are identified by index in the list. Focus will remain in the same position when the list is reversed.</li>
+                <li><b>Field name</b>: <code>"name"</code> list items are identified by field name. Focus will move with the item as the list is reordered.</li>
+                <li><b>Function: field</b>: <code>item => item.name</code> Equivalent to the case above.</li>
+                <li><b>Function: object</b>: <code>item => item</code> List items are identified by item equality. Focus will be lost when the list is regenerated via JSON.</li>
+                <li><b>non-unique</b>: <code>"missing"</code> List items are identified by a field not present in the data. Items are not correctly tracked. Focus is usually lost.</li>
+            </ul>
+            <p>The number indicates the order in which the element was created.</p>
+            <p>Try focusing one of the inputs and then press <kbd>shift</kbd>+<kbd>ctrl</kbd>/<kbd>cmd</kbd> and:</p>
+            <ul>
+                <li><kbd>F1</kbd>: Update the list, keeping items in the same place</li>
+                <li><kbd>F2</kbd>: Reverse the list</li>
+                <li><kbd>F3</kbd>: Regenerate the list from JSON</li>
+            </ul>
+        </section>
+        <a class="script" href="./map.js"></a>
+    </article>
     <article id="progressive">
         <h1>Progressive enhancement</h1>
         <section>
@@ -160,6 +191,19 @@
         </section>
         <a class="script" href="./svg.js"></a>
     </article>
+    <article id="dnd">
+        <h1>Drag and drop</h1>
+        <section>
+        </section>
+        <a class="script" href="./drag-and-drop.js"></a>
+    </article>
+    <article id="content-editable">
+        <h1>Content Editable</h1>
+        <section>
+        </section>
+        <a class="script" href="./content-editable.js"></a>
+    </article>
+
     <script src="./examples.js">
     </script>
 </body>
