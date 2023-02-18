@@ -3,7 +3,7 @@ import { Data, on, properties } from "ui-io";
 const shallowEquals = (a1, a2) => a1 && a2 && a1.length == a2.length && a1.every((item, index) => a2[index] == item);
 
 function getParentOffset(node, offset, parent) {
-    
+
     if (parent.nodeType == Node.TEXT_NODE) {
         if (parent == node) return offset;
         return parent.nodeValue.length;
@@ -14,7 +14,7 @@ function getParentOffset(node, offset, parent) {
         if (parent == node) {
             for (let child of [...parent.childNodes].slice(0, offset)) {
                 count += getParentOffset(node, offset, child);
-            }    
+            }
         }
         for (let child of parent.childNodes) {
             count += getParentOffset(node, offset, child);
@@ -48,44 +48,67 @@ function getChildOffset(parent, offset) {
 
 export function contentEditable(content$, selection$ = new Data()) {
 
+    let history = [];
+    let content, selection;
+
     function getSelection(event) {
-        let selection = window.getSelection();
-        let anchorOffset = getParentOffset(selection.anchorNode, selection.anchorOffset, event.currentTarget);
-        let focusOffset = getParentOffset(selection.focusNode, selection.focusOffset, event.currentTarget);
-        selection$.set([anchorOffset, focusOffset]);
+        let browserSelection = window.getSelection();
+        let anchorOffset = getParentOffset(browserSelection.anchorNode, browserSelection.anchorOffset, event.currentTarget);
+        let focusOffset = getParentOffset(browserSelection.focusNode, browserSelection.focusOffset, event.currentTarget);
+        selection = [anchorOffset, focusOffset];
+        selection$.set(selection);
     }
+
+    function setSelection(element) {
+        if (!selection) return;
+        let [anchorOffset, focusOffset] = selection;
+        window.getSelection().setBaseAndExtent(
+            ...getChildOffset(element, anchorOffset),
+            ...getChildOffset(element, focusOffset)
+        );
+    }
+
+
 
     return [
         properties({ contentEditable: true }),
+        on('beforeinput', event => {
+            //console.log("before input event", event.inputType, event.currentTarget.innerHTML);
+            if (event.inputType == "historyUndo") {
+                history.pop();
+                event.currentTarget.innerHTML = history.pop();
+            }
+        }),
         on('input', event => {
-            let childNodes = [...event.currentTarget.childNodes];
+            //console.log("input event", event.inputType, event.currentTarget.innerHTML);
+            content = [...event.currentTarget.childNodes];
             getSelection(event);
-            content$.set(childNodes);
+            content$.set(content);
+        }),
+        on('keydown', event => {
+            if (event.key == "Enter") {
+                document.execCommand('insertLineBreak');
+                event.preventDefault();
+            }
         }),
         on('keyup', getSelection),
         on('click', getSelection),
         on('blur', () => selection$.set(null)),
         on('focus', getSelection),
-        (element) => Data.from(content$, selection$, (content, cursor) => [content, cursor]).observe(element,
-            ([content, selection]) => {
-                if (shallowEquals(content$.get(), [...element.childNodes])) return;
-                element.replaceChildren(...content);
-                if (selection) {
-                    let [anchorOffset, focusOffset] = selection;
-                    window.getSelection().setBaseAndExtent(
-                        ...getChildOffset(element, anchorOffset),
-                        ...getChildOffset(element, focusOffset)
-                    );
-                }
-            }
-        )
+        (element) => content$.observe(element, newContent => {
+            if (content == newContent) return;
+            content = newContent;
+            element.replaceChildren(...content);
+            setSelection(element);
+            history.push(element.innerHTML);
+        }),
     ];
 }
 
 export function textExtract(content) {
     return content.map(node => {
         if (node.nodeType == Node.TEXT_NODE) return node.nodeValue;
-        if (node.nodeType == Node.ELEMENT_NODE) return textExtract([...node.childNodes]);
+        if (node.nodeType == Node.ELEMENT_NODE) return (["P", "DIV"].includes(node.nodeName) ? "\n" : "") + textExtract([...node.childNodes]);
         return '';
     }).join("");
 }
