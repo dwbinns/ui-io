@@ -137,6 +137,10 @@ export function value(data) {
     });
 }
 
-
-
+export function checked(boolean$) {
+    return [
+        properties({ type: 'checkbox', checked: boolean$ }),
+        on('change', ({ target }) => boolean$.set(target.checked))
+    ];
+}
 
