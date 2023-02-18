@@ -102,18 +102,18 @@ if (!articles.find(a => a.id == selectedId$.get())) {
     selectedId$.set(articles[0].id);
 }
 
-let prior$ = selectedId$.to(id => articles[articles.findIndex(a => a.id == id) - 1]);
-let next$ = selectedId$.to(id => articles[articles.findIndex(a => a.id == id) + 1]);
+let prior$ = selectedId$.to(id => articles[articles.findIndex(a => a.id == id) - 1] || null);
+let next$ = selectedId$.to(id => articles[articles.findIndex(a => a.id == id) + 1] || null);
 
 let prior = prior$.if(div(
     on('click', () => selectedId$.set(prior$.get().id)),
     "< ",
-    prior$.to(article => article.title)
+    prior$.to(article => article?.title)
 ), div());
 
 let next = next$.if(div(
     on('click', () => selectedId$.set(next$.get().id)),
-    next$.to(article => article.title),
+    next$.to(article => article?.title),
     " >"
 ), div());
 
