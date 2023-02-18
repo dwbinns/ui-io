@@ -38,10 +38,10 @@ export class Data {
     #references = [];
 
     constructor(value) {
-        this.value = value;
         let error = new Error();
         error.name = "Definition";
         this.location = error.stack;
+        this.set(value);
     }
 
     async stream(asyncIterable) {
@@ -57,6 +57,14 @@ export class Data {
     }
 
     set(value) {
+        if (value instanceof Data) {
+            if (this.sourceData == value) return;
+            this.sourceData = value;
+            this.sourceObserver = value.#notify(v => this.sourceData == value && this.update(v));
+            this.update(value.get());
+            return;
+        }
+        this.sourceData = null;
         if (this.value === value) return;
         this.update(value);
     }
@@ -104,11 +112,11 @@ export class Data {
 
     #transform(target, transform) {
         if (transform.forceUpdate) {
-            return this.#notify(nonReEntrant(v => target.update(transform(v, target.value))));    
+            return this.#notify(nonReEntrant(v => target.update(transform(v, target.value))));
         } else {
             return this.#notify(nonReEntrant(v => target.set(transform(v, target.value))));
         }
-    } 
+    }
 
     observe(target, callback) {
         target[Symbol()] = this.#notify(nonReEntrant(callback));
@@ -135,6 +143,21 @@ export class Data {
         derived.derive(this, forward);
 
         return derived;
+    }
+
+    resolve() {
+        return this;
+        let result = new Data();
+        let symbol = Symbol();
+        this.observe(result, value => {
+            if (value instanceof Data) {
+                result[symbol] = value.#notify(v => this.get() == value && result.set(v));
+                result.set(value.get());
+            } else {
+                result.set(value);
+            }
+        });
+        return result;
     }
 
     debounce(waitMS) {
@@ -194,9 +217,11 @@ export class Data {
                 if (cache.has(id)) {
                     [item$, index$, transformed] = cached;
                     cache.delete(id);
+                    index$.set(i);
+                    item$.set(v);
                 } else {
-                    index$ = new Data();
-                    item$ = new Data();
+                    index$ = new Data(i);
+                    item$ = new Data(v);
                     item$.propagate(this, (newValue, array) => updateArray(array, index$.get(), newValue));
                     let remove = () => this.set(this.get().filter((_, index) => index !== index$.get()));
                     let insertAfter = value => {
@@ -217,8 +242,6 @@ export class Data {
                     transformed = transform(item$, index$, { remove, insertAfter, insertBefore, replace });
                     cached = [item$, index$, transformed];
                 }
-                index$.set(i);
-                item$.set(v);
 
                 nextCache.set(id, cached);
                 return transformed;
@@ -257,7 +280,7 @@ export class Data {
     if(positive, negative) {
         let positiveFn = factoryOf(positive);
         let negativeFn = factoryOf(negative);
-        return this.to(v => v ? positiveFn(v) : negativeFn(v));
+        return this.to(v => !!v).to(v => v ? positiveFn(v) : negativeFn(v));
     }
 
     is(test) {
