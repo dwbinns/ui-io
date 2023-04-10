@@ -106,6 +106,7 @@ export function contentEditable(content$, selection$ = new Data()) {
 }
 
 export function textExtract(content) {
+    if (typeof content == "string") return content;
     return content.map(node => {
         if (node.nodeType == Node.TEXT_NODE) return node.nodeValue;
         if (node.nodeType == Node.ELEMENT_NODE) return (["P", "DIV"].includes(node.nodeName) ? "\n" : "") + textExtract([...node.childNodes]);
