@@ -288,8 +288,10 @@ export class Data {
     }
 
     write(callback) {
-        this.observe(this, callback);
-        return this;
+        return this.to(v => v, (v, original) => {
+            if (v != original) Promise.resolve(callback(v)).catch(console.error);
+            return v;
+        });
     }
 
     static from(...args) {
